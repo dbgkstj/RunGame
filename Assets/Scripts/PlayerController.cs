@@ -14,15 +14,45 @@ public class PlayerController : MonoBehaviour {
    private AudioSource playerAudio; // 사용할 오디오 소스 컴포넌트
 
    private void Start() {
-       // 초기화
+        // 초기화
+        playerRigidbody = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        playerAudio = GetComponent<playerAudioScource>();
    }
 
    private void Update() {
        // 사용자 입력을 감지하고 점프하는 처리
+       if(isDead)
+            {
+            return;
+        }
+        if(Input.GetMouseButtonDown(0) && jumpCount < 2)
+        {
+            jumpCount++;
+            playerRigidbody.velocity = Vector2.zero;
+            playerRigidbody.AddForce(new Vector2(0, jumpForce));
+            playerAudio.play();
+        }
+        else if(input.GetMouseButtonUp(0) && playerRigidbody.velocity.y > 0)
+        {
+            playerRigidbody.velocity = playerRigidbody.velocoity * 0.5f;
+        }
+        animator.SetBool("Grounded", isGrounded);
    }
-
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag == "Dead" && !isDead)
+        {
+            Die();
+        }
+    }
    private void Die() {
-       // 사망 처리
+        // 사망 처리
+        animator.SetTrigger("Die");
+        playerAudio.clip = deathClip;
+        playerAudio.Play();
+        playerRigidbody.velocity = Vector2.zero;
+        isDead = true;
    }
 
    private void OnTriggerEnter2D(Collider2D other) {
